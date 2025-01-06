@@ -1,14 +1,22 @@
 import numpy as np
 
+def load_order(path_to_order):
+    order = []
+    with open(path_to_order, 'r') as fid:
+        for lines in fid:
+            str_line = lines.strip()
+            order.append(str_line)
+        order = sorted(order)
+    return order
 
 def load_transactions(path_to_data, order):
     transactions = []
     with open(path_to_data, 'r') as fid:
         for lines in fid:
             str_line = [item.strip() for item in lines.strip().split(',')]
-            _t = list(np.unique(str_line))
-            _t.sort(key=lambda x: order.index(x)) 
-            transactions.append(_t)
+            t = list(np.unique(str_line))
+            t.sort(key=lambda x: order.index(x)) 
+            transactions.append(t)
     return transactions
 
 def combinations(iterable, r):
@@ -22,7 +30,7 @@ def combinations(iterable, r):
     yield tuple(pool[i] for i in indices)
     while True:
         for i in reversed(range(r)):
-            if indices[i] != i + n - r:
+            if indices[i] != i + n - r: #123 124 125 [1,2,3,4,5]
                 break
         else:
             return
@@ -30,6 +38,14 @@ def combinations(iterable, r):
         for j in range(i+1, r):
             indices[j] = indices[j-1] + 1
         yield tuple(pool[i] for i in indices)
+
+def powerset(s):
+    rules = []
+    for r in range(1, len(s)):
+       rule = combinations(s,r)
+       rules += rule 
+        
+    return list(rules)
 
 def join_two_itemsets(it1, it2, order):
     it1.sort(key=lambda x: order.index(x))
@@ -44,7 +60,7 @@ def join_two_itemsets(it1, it2, order):
 
 def join_set_itemsets(set_of_items, order):
     C = []
-    for i in range(len(set_of_items)):
+    for i in range(len(set_of_items)-1):
         for j in range(i + 1, len(set_of_items)):
             it_out = join_two_itemsets(set_of_items[i], set_of_items[j], order)
             if len(it_out) > 0:
@@ -83,15 +99,8 @@ def get_frequent(itemsets, transactions, min_support, prev_discarded):
 
     return L, supp_count, new_discarded   
 
-def powerset(s):
-    rules = []
-    for r in range(1, len(s)):
-       rule = combinations(s,r)
-       rules += rule 
-        
-    return list(rules)
 
-#printing out the rules
+#in luật
 def write_rules(X, X_S, S, conf, supp, lift, num_trans):
     out_rules = ""
     out_rules += "Freq. Itemset: {}\n".format(X)
